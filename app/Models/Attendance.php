@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Attendance extends Model
 {
@@ -30,4 +31,51 @@ class Attendance extends Model
     {
         return $this->hasMany(Overtime::class);
     }
+
+public function getTotalWorkHoursAttribute()
+{
+    if (!$this->clock_in || !$this->clock_out) {
+        return 0.0; // jam desimal
+    }
+
+    $clockIn  = Carbon::parse($this->clock_in);
+    $clockOut = Carbon::parse($this->clock_out);
+
+    // 1) Gross menit (tanpa break & izin)
+    $grossMinutes = $clockIn->diffInMinutes($clockOut);
+
+    // 2) Aturan shift
+    $st = optional($this->employee->position->shiftTemplates->first());
+    $breakMinutes = (int) round(($st->break_duration ?? 0) * 60);
+    $maxWorkMinutes = (int) round(($st->max_work_hour ?? 0) * 60);
+    
+    // 3) Total izin
+    $leaveMinutes = $this->permissions->sum(function ($p) {
+        if (!$p->end_time) return 0;
+        return Carbon::parse($p->start_time)->diffInMinutes(Carbon::parse($p->end_time));
+    });
+    dd($grossMinutes,$breakMinutes, $maxWorkMinutes, $leaveMinutes);
+
+    // 4) Total lembur
+    $overtimeMinutes = $this->overtimes->sum(function ($o) {
+        if (!$o->end_time) return 0;
+        return Carbon::parse($o->start_time)->diffInMinutes(Carbon::parse($o->end_time));
+    });
+
+    // 5) Hitung total menit
+    $totalMinutes = $grossMinutes - $breakMinutes - $leaveMinutes;
+
+    // 6) Tambahkan lembur hanya jika melewati max work + 1 jam
+    if ($maxWorkMinutes > 0 && $grossMinutes > ($maxWorkMinutes + 60)) {
+        $totalMinutes += $overtimeMinutes;
+    }
+
+    $totalMinutes = max($totalMinutes, 0);
+
+    // 7) Konversi ke jam desimal
+    $totalHoursDecimal = round($totalMinutes / 60, 2); // 2 desimal
+
+    return $totalHoursDecimal; // langsung float
+}
+
 }

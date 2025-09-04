@@ -50,4 +50,8 @@ class Employee extends Model
     {
         return $this->hasMany(RequestAbsent::class);
     }
+    public function shiftSchedules(): HasMany
+    {
+        return $this->hasMany(ShiftSchedule::class);
+    }
 }

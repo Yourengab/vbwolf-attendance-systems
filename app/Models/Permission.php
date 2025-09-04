@@ -10,6 +10,7 @@ class Permission extends Model
     protected $fillable = [
         'attendance_id',
         'start_time',
+        'reason',
         'end_time',
     ];
 

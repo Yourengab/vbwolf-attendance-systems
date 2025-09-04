@@ -62,9 +62,11 @@
                     </ul>
                     <div class="divider"></div>
                     <div class="flex gap-2">
-                        <form method="POST" action="{{ route('employee.leave_start') }}">
+                        <form method="POST" action="{{ route('employee.leave_start') }}" class="flex flex-col gap-2">
                             @csrf
                             <button class="btn" {{ (!$clockedIn || $clockedOut || $hasLeaveAny) ? 'disabled' : '' }}>Start Leave</button>
+                            <label for="reason">Reason</label>
+                            <textarea name="reason" id="reason" cols="30" rows="10" class="border border-black"></textarea>
                         </form>
                         <form method="POST" action="{{ route('employee.leave_end') }}">
                             @csrf
@@ -90,6 +92,8 @@
                         <form method="POST" action="{{ route('employee.overtime_start') }}">
                             @csrf
                             <button class="btn" {{ ($clockedOut && !$activeOvertime && $overtimes->count() == 0) ? '' : 'disabled' }}>Start Overtime</button>
+                             <label for="reason">Reason</label>
+                            <textarea name="reason" id="reason" cols="30" rows="10" class="border border-black"></textarea>
                         </form>
                         <form method="POST" action="{{ route('employee.overtime_end') }}">
                             @csrf
@@ -182,15 +186,40 @@
             </div>
         </div>
     </div>
+    
+<div class="card bg-base-100 shadow">
+                <div class="card-body">
+                    <h2 class="card-title">Shift Schedule</h2>
+                    <form method="POST" action="{{ route('employee.shift-schedule') }}" class="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
+                        @csrf
+                        <div class="form-control">
+                            <label class="label"><span class="label-text">Date</span></label>
+                            <input type="date" name="date" class="input input-bordered" required />
+                        </div>
+                        <div class="form-control">
+                            <label class="label"><span class="label-text">Shift Hour</span></label>
+                            <select name="shift_hour_id" class="select select-bordered" required>
+                                @foreach($shiftHours as $sh)
+                                <option value="{{ $sh->id }}">{{ $sh->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <input type="hidden" name="status" value="pending">
+                        <div class="md:col-span-3">
+                            <button class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <dialog id="clockInModal" class="modal">
         <div class="modal-box">
             <h3 class="font-bold text-lg mb-2">Clock In - Photo Proof</h3>
             <p class="text-sm opacity-70 mb-2">Upload a photo or take one with your camera. When prompted, allow camera access.</p>
             <form method="POST" action="{{ route('employee.clock_in') }}" enctype="multipart/form-data" class="space-y-3">
                 @csrf
-                <div class="form-control">
-                    <input type="file" name="photo" accept="image/*" class="file-input file-input-bordered w-full" id="photo_file" />
-                </div>
                 <div class="divider">or</div>
                 <div class="space-y-2">
                     <div id="camera_wrap">

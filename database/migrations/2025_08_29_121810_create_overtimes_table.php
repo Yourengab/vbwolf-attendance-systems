@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('overtimes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('attendance_id')->constrained('attendances');
+            $table->foreignId('attendance_id')->constrained('attendances')->onDelete('cascade')->onUpdate('cascade');
             $table->dateTime('start_time');
             $table->dateTime('end_time')->nullable();
             $table->timestamps();

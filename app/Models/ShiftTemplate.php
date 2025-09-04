@@ -9,9 +9,6 @@ class ShiftTemplate extends Model
 {
     protected $fillable = [
         'position_id',
-        'name',
-        'start_work',
-        'end_work',
         'max_work_hour',
         'break_duration',
     ];

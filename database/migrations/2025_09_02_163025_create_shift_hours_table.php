@@ -11,12 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('permissions', function (Blueprint $table) {
+        Schema::create('shift_hours', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('attendance_id')->constrained('attendances')->onDelete('cascade')->onUpdate('cascade');
-            $table->text('reason');
-            $table->dateTime('start_time');
-            $table->dateTime('end_time')->nullable();
+            $table->string('name', 50);
             $table->timestamps();
         });
     }
@@ -26,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('permissions');
+        Schema::dropIfExists('shift_hours');
     }
 };

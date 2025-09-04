@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('request_shifts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees');
+            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade')->onUpdate('cascade');
             $table->date('actual_date');
             $table->date('request_date');
-            $table->enum('shift', ['morning', 'evening', 'night']);
+            $table->foreignId('shift_hour_id')->constrained('shift_hours')->onDelete('cascade')->onUpdate('cascade');
             $table->text('reason')->nullable();
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->foreignId('approved_by')->nullable()->constrained('users');

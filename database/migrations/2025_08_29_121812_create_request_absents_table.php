@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('request_absents', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees');
+            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade')->onUpdate('cascade');
             $table->date('date');
             $table->enum('shift', ['morning', 'evening', 'night']);
             $table->text('reason')->nullable();

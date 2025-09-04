@@ -11,15 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('attendances', function (Blueprint $table) {
+        Schema::create('shift_schedules', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('employee_id')->constrained('employees');
             $table->date('date');
-            $table->dateTime('clock_in')->nullable();
-            $table->dateTime('clock_out')->nullable();
-            $table->string('photo', 255)->nullable();
+            $table->foreignId('shift_hour_id')->constrained('shift_hours')->onDelete('cascade')->onUpdate('cascade');
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->timestamps();
-            $table->unique(['employee_id', 'date']);
         });
     }
 
@@ -28,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('attendances');
+        Schema::dropIfExists('shift_schedules');
     }
 };

@@ -95,6 +95,44 @@
             </div>
             <div class="p-2">{{ $absent->links() }}</div>
         </section>
+
+        <section>
+            <h2 class="font-semibold mb-3">Shift Schedule Request</h2>
+            <div class="overflow-x-auto">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Date</th>
+                            <th>Shift Hour</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($schedule as $r)
+                        <tr>
+                            <td>{{ $r->employee->name }} ({{ $r->employee->nip }})</td>
+                            <td>{{ $r->date }}</td>
+                            <td>{{ $r->shiftHour->name }}</td>
+                            <td>{{ $r->status }}</td>
+                            <td class="flex gap-2">
+                                <form method="POST" action="{{ route('admin.requests.schedule', $r) }}">
+                                    @csrf
+                                    <input type="hidden" name="action" value="approve">
+                                    <button class="btn btn-sm btn-primary">Approve</button>
+                                </form>
+                                <form method="POST" action="{{ route('admin.requests.schedule', $r) }}">
+                                    @csrf
+                                    <input type="hidden" name="action" value="reject">
+                                    <button class="btn btn-sm btn-neutral">Reject</button>
+                                </form>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+        </section>
     </main>
 </body>
 </html>

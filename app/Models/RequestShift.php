@@ -27,4 +27,8 @@ class RequestShift extends Model
     {
         return $this->belongsTo(User::class, 'approved_by');
     }
+    public function shiftHour(): BelongsTo
+    {
+        return $this->belongsTo(ShiftHour::class);
+    }
 }

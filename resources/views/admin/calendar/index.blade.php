@@ -92,6 +92,10 @@
                     <div class="stat-title">Pending Requests</div>
                     <div class="stat-value text-warning" id="pending-requests">-</div>
                 </div>
+                <div class="stat bg-base-100 rounded-lg shadow">
+                    <div class="stat-title">Shift Schedule</div>
+                    <div class="stat-value text-warning" id="shift-schedule">-</div>
+                </div>
             </div>
 
             <div class="bg-base-100 border border-base-300 rounded p-4">
@@ -245,19 +249,30 @@
                     
                     // Add custom styling based on event type
                     switch(props.type) {
-                        case 'attendance':
-                            info.el.style.borderLeft = '4px solid #10b981';
-                            break;
-                        case 'shift':
-                            info.el.style.borderLeft = '4px solid #3b82f6';
+                        case 'present':
+                            info.el.style.backgroundColor = '#10b981'; // Green
+                            info.el.style.borderColor = '#10b981';
                             break;
                         case 'absent':
-                            info.el.style.borderLeft = '4px solid #ef4444';
+                            info.el.style.backgroundColor = '#ef4444'; // Red
+                            info.el.style.borderColor = '#ef4444';
+                            break;
+                        case 'shift_change':
+                            info.el.style.backgroundColor = '#3b82f6'; // Blue
+                            info.el.style.borderColor = '#3b82f6';
                             break;
                         case 'pending_shift':
                         case 'pending_absent':
-                            info.el.style.borderLeft = '4px solid #f59e0b';
+                            info.el.style.backgroundColor = '#f59e0b'; // Orange
+                            info.el.style.borderColor = '#f59e0b';
                             break;
+                        case 'shift_schedule':
+                            info.el.style.backgroundColor = '#2332db'; // Custom Blue
+                            info.el.style.borderColor = '#2332db';
+                            break;
+                        default:
+                            info.el.style.backgroundColor = '#6b7280'; // Gray
+                            info.el.style.borderColor = '#6b7280';
                     }
                     
                     // Add custom tooltip content
@@ -338,7 +353,6 @@
                 },
                 dayHeaderFormat: {
                     weekday: 'short',
-                    day: 'numeric'
                 },
                 firstDay: 1, // Monday
                 weekNumbers: true,
@@ -458,6 +472,7 @@
                         document.getElementById('absent-count').textContent = data.absent_count;
                         document.getElementById('shift-changes').textContent = data.shift_changes;
                         document.getElementById('pending-requests').textContent = data.pending_requests;
+                        document.getElementById('shift-schedule').textContent = data.shift_schedule;
                     })
                     .catch(error => {
                         console.error('Error loading calendar stats:', error);
@@ -559,6 +574,13 @@
                                 <p><strong>Shift:</strong> ${props.shift}</p>
                                 <p><strong>Status:</strong> <span class="badge badge-warning">Pending</span></p>
                                 ${props.reason ? `<p><strong>Reason:</strong> ${props.reason}</p>` : ''}
+                            </div>
+                        `;
+                        case 'shift_schedule':
+                        contentHtml = `
+                            <div class="space-y-2">
+                                <p><strong>Employee:</strong> ${props.employee}</p>
+                                <p><strong>Shift Hour:</strong> ${props.shift_hour}</p>
                             </div>
                         `;
                         break;

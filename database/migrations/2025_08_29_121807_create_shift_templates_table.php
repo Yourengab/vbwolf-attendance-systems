@@ -13,10 +13,7 @@ return new class extends Migration
     {
         Schema::create('shift_templates', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('position_id')->constrained('positions');
-            $table->string('name', 50);
-            $table->time('start_work');
-            $table->time('end_work');
+            $table->foreignId('position_id')->constrained('positions')->onDelete('cascade')->onUpdate('cascade');
             $table->decimal('max_work_hour', 4, 2);
             $table->decimal('break_duration', 4, 2);
             $table->timestamps();

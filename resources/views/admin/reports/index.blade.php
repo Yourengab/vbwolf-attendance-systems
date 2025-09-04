@@ -54,6 +54,7 @@
                             <th>Employee</th>
                             <th>Clock In</th>
                             <th>Clock Out</th>
+                            <th>Total Work</th>
                             <th>Photo</th>
                         </tr>
                     </thead>
@@ -64,6 +65,7 @@
                             <td>{{ $a->employee->name }} ({{ $a->employee->nip }})</td>
                             <td>{{ $a->clock_in }}</td>
                             <td>{{ $a->clock_out }}</td>
+                            <td>{{ number_format($a->total_work_hours, 2) }} hours</td>
                             <td>
                                 @if($a->photo)
                                     <a href="{{ Storage::url($a->photo) }}" class="link" target="_blank">View</a>

@@ -19,6 +19,8 @@
             <a href="{{ route('admin.requests') }}" class="btn btn-ghost justify-start">Requests</a>
             <a href="{{ route('admin.reports') }}" class="btn btn-ghost justify-start">Reports</a>
             <a href="{{ route('admin.calendar') }}" class="btn btn-ghost justify-start">Calendar</a>
+            <a href="{{ route('admin.shift-hour') }}" class="btn btn-ghost justify-start">Shift Hour</a>
+            <a href="{{ route('admin.shift-templates') }}" class="btn btn-ghost justify-start">Shift Templates</a>
             <form method="POST" action="{{ route('logout') }}" class="pt-4 border-t border-base-300 mt-2">
                 @csrf
                 <button class="btn btn-ghost justify-start w-full">Logout</button>
