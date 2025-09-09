@@ -35,26 +35,25 @@ class Attendance extends Model
 public function getTotalWorkHoursAttribute()
 {
     if (!$this->clock_in || !$this->clock_out) {
-        return 0.0; // jam desimal
+        return "0 hours 0 minutes";
     }
 
     $clockIn  = Carbon::parse($this->clock_in);
     $clockOut = Carbon::parse($this->clock_out);
 
-    // 1) Gross menit (tanpa break & izin)
+    // 1) Gross menit
     $grossMinutes = $clockIn->diffInMinutes($clockOut);
 
     // 2) Aturan shift
     $st = optional($this->employee->position->shiftTemplates->first());
     $breakMinutes = (int) round(($st->break_duration ?? 0) * 60);
     $maxWorkMinutes = (int) round(($st->max_work_hour ?? 0) * 60);
-    
+
     // 3) Total izin
     $leaveMinutes = $this->permissions->sum(function ($p) {
         if (!$p->end_time) return 0;
         return Carbon::parse($p->start_time)->diffInMinutes(Carbon::parse($p->end_time));
     });
-    dd($grossMinutes,$breakMinutes, $maxWorkMinutes, $leaveMinutes);
 
     // 4) Total lembur
     $overtimeMinutes = $this->overtimes->sum(function ($o) {
@@ -72,10 +71,12 @@ public function getTotalWorkHoursAttribute()
 
     $totalMinutes = max($totalMinutes, 0);
 
-    // 7) Konversi ke jam desimal
-    $totalHoursDecimal = round($totalMinutes / 60, 2); // 2 desimal
+    // 7) Konversi ke jam & menit
+    $hours = intdiv($totalMinutes, 60);  // jam utuh
+    $minutes = $totalMinutes % 60;       // sisa menit
 
-    return $totalHoursDecimal; // langsung float
+    return "{$hours} hours {$minutes} minutes";
 }
+
 
 }

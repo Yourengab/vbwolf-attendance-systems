@@ -24,7 +24,37 @@ class AdminController extends Controller
         $totalEmployees = Employee::count();
         $todayClockedIn = Attendance::whereDate('date', $today)->whereNotNull('clock_in')->count();
         $pendingRequests = RequestAbsent::where('status', 'pending')->count() + RequestShift::where('status', 'pending')->count();
-        return view('admin.dashboard', compact('totalEmployees', 'todayClockedIn', 'pendingRequests'));
+        
+        // Get all employee data with relationships
+        $employees = Employee::with(['branch', 'position', 'user'])->orderBy('name')->get();
+        
+        // Get pending absent requests
+        $pendingAbsentRequests = RequestAbsent::with(['employee.branch', 'employee.position'])
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        // Get pending shift requests
+        $pendingShiftRequests = RequestShift::with(['employee.branch', 'employee.position'])
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        // Get pending shift schedule requests
+        $pendingScheduleRequests = ShiftSchedule::with(['employee.branch', 'employee.position', 'shiftHour'])
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        return view('admin.dashboard', compact(
+            'totalEmployees', 
+            'todayClockedIn', 
+            'pendingRequests',
+            'employees',
+            'pendingAbsentRequests',
+            'pendingShiftRequests',
+            'pendingScheduleRequests'
+        ));
     }
 
     public function branches(Request $request)
