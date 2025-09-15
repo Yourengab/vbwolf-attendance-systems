@@ -42,7 +42,10 @@
         <h3 class="text-lg font-semibold text-gray-900 mb-4">Add New Employee</h3>
         <form method="post" action="{{ route('admin.employees.store') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             @csrf
-            <input type="hidden" name="email" value="">
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                <input type="email" id="email" name="email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400" required>
+            </div>
             <div>
                 <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
                 <input type="text" id="name" name="name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400" required>
@@ -115,6 +118,8 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $e->user?->email ?: '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex space-x-2">
+                                <input type="hidden" id="branch_id_{{ $e->id }}" value="{{ $e->branch_id }}">
+                                <input type="hidden" id="position_id_{{ $e->id }}" value="{{ $e->position_id }}">
                                 <button onclick="openEditModal({{ $e->id }}, '{{ $e->name }}', '{{ $e->employment_status }}')" class="px-3 py-1 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors">
                                     Edit
                                 </button>
@@ -152,6 +157,24 @@
                     <input type="text" id="edit_name" name="name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400" required>
                 </div>
                 <div>
+                    <label for="edit_branch" class="block text-sm font-medium text-gray-700 mb-1">Branch</label>
+                    <select id="edit_branch" name="branch_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400" required>
+                        <option value="">Select Branch</option>
+                        @foreach($branches as $b)
+                            <option value="{{ $b->id }}">{{ $b->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label for="edit_position" class="block text-sm font-medium text-gray-700 mb-1">Position</label>
+                    <select id="edit_position" name="position_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400" required>
+                        <option value="">Select Position</option>
+                        @foreach($positions as $p)
+                            <option value="{{ $p->id }}">{{ $p->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
                     <label for="edit_status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                     <select id="edit_status" name="employment_status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400" required>
                         <option value="active">Active</option>
@@ -171,6 +194,8 @@
             document.getElementById('edit_employee_id').value = id;
             document.getElementById('edit_name').value = name;
             document.getElementById('edit_status').value = status;
+            document.getElementById('edit_branch').value = document.getElementById(`branch_id_${id}`)?.value || '';
+            document.getElementById('edit_position').value = document.getElementById(`position_id_${id}`)?.value || '';
             document.getElementById('editForm').action = `/admin/employees/${id}`;
             document.getElementById('editModal').classList.remove('hidden');
         }

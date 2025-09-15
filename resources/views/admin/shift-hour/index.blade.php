@@ -101,7 +101,7 @@
         function openEditModal(id, name) {
             document.getElementById('edit_shift_hour_id').value = id;
             document.getElementById('edit_name').value = name;
-            document.getElementById('editForm').action = `/admin/shift-hour/${id}`;
+            document.getElementById('editForm').action = `/admin/shift-hours/${id}`;
             document.getElementById('editModal').classList.remove('hidden');
         }
 

@@ -46,20 +46,20 @@ class EmployeeController extends Controller
         foreach ($leaves as $leave) {
             $start = Carbon::parse($leave->start_time);
             $end = $leave->end_time ? Carbon::parse($leave->end_time) : Carbon::now('Asia/Makassar');
-            $leaveMinutes += max(0, $end->diffInMinutes($start));
+            $leaveMinutes += max(0, $start->diffInMinutes($end));
         }
 
         $workMinutes = 0;
         if ($clockInAt) {
             $end = $clockOutAt ?: Carbon::now('Asia/Makassar');
-            $workMinutes = max(0, $end->diffInMinutes($clockInAt) - $leaveMinutes);
+            $workMinutes = max(0, $clockInAt->diffInMinutes($end) - $leaveMinutes);
         }
 
         $overtimeMinutes = 0;
         foreach ($overtimes as $ot) {
             $start = Carbon::parse($ot->start_time);
             $end = $ot->end_time ? Carbon::parse($ot->end_time) : Carbon::now('Asia/Makassar');
-            $overtimeMinutes += max(0, $end->diffInMinutes($start));
+            $overtimeMinutes += max(0, $start->diffInMinutes($end));
         }
 
         $formatMinutes = function (int $minutes): string {

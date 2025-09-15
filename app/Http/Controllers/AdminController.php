@@ -147,15 +147,18 @@ class AdminController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:100'],
+            'email' => ['required', 'email', 'unique:users,email'],
             'nip' => ['nullable', 'string', 'max:50'],
             'branch_id' => ['required', 'exists:company_branches,id'],
             'position_id' => ['required', 'exists:positions,id'],
             'employment_status' => ['required', 'in:active,inactive'],
         ]);
-        $user = User::firstOrCreate(
-            ['email' => $request->input('email', 'employee' . uniqid() . '@example.com')],
-            ['password' => 'password', 'role' => 'employee', 'name' => $data['name']]
-        );
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => bcrypt('password'),
+            'role' => 'employee',
+        ]);
         $data['user_id'] = $user->id;
         Employee::create($data);
         return back()->with('success', 'Employee created.');
@@ -567,8 +570,8 @@ class AdminController extends Controller
     public function shiftTemplateUpdate(ShiftTemplate $shiftTemplate, Request $request)
     {
         $data = $request->validate([
-            'position' => ['required', 'exists:positions,id'],
-            'max_working_hours' => ['required', 'string', 'max:50'],
+            'position_id' => ['required', 'exists:positions,id'],
+            'max_work_hour' => ['required', 'string', 'max:50'],
             'break_duration' => ['required', 'string', 'max:50'],
         ]);
         $shiftTemplate->update($data);

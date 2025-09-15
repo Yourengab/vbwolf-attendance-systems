@@ -46,8 +46,8 @@ public function getTotalWorkHoursAttribute()
 
     // 2) Aturan shift
     $st = optional($this->employee->position->shiftTemplates->first());
-    $breakMinutes = (int) round(($st->break_duration ?? 0) * 60);
-    $maxWorkMinutes = (int) round(($st->max_work_hour ?? 0) * 60);
+    $breakMinutes = (int) ($st->break_duration ?? 0);
+    $maxWorkMinutes = (int) ($st->max_work_hour ?? 0);
 
     // 3) Total izin
     $leaveMinutes = $this->permissions->sum(function ($p) {
