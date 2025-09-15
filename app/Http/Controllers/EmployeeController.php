@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use App\Models\User;
+use App\Models\Employee;
 use App\Models\Overtime;
 use App\Models\Position;
 use App\Models\Attendance;
@@ -20,6 +22,7 @@ class EmployeeController extends Controller
 {
     public function dashboard()
     {
+        /** @var User $user */
         $user = Auth::user();
         $employee = $user->employee()->with(['attendances' => function ($q) {
             $q->orderByDesc('date');
@@ -78,7 +81,9 @@ class EmployeeController extends Controller
 
     public function clockIn(Request $request)
     {
-        $employee = Auth::user()->employee;
+        /** @var User $user */
+        $user = Auth::user();
+        $employee = $user->employee;
         $attendance = Attendance::firstOrCreate([
             'employee_id' => $employee->id,
             'date' => now('Asia/Makassar')->toDateString(),
@@ -123,7 +128,9 @@ class EmployeeController extends Controller
 
     public function clockOut(Request $request)
     {
-        $employee = Auth::user()->employee;
+        /** @var User $user */
+        $user = Auth::user();
+        $employee = $user->employee;
         $attendance = Attendance::where('employee_id', $employee->id)
             ->where('date', now('Asia/Makassar')->toDateString())
             ->first();
@@ -170,7 +177,9 @@ class EmployeeController extends Controller
 
     public function leaveStart(Request $request)
     {
-        $employee = Auth::user()->employee;
+        /** @var User $user */
+        $user = Auth::user();
+        $employee = $user->employee;
         $attendance = Attendance::where('employee_id', $employee->id)->where('date', now('Asia/Makassar')->toDateString())->first();
         if (!$attendance || !$attendance->clock_in) {
             return back()->with('error', 'Clock in first.');
@@ -189,7 +198,9 @@ class EmployeeController extends Controller
 
     public function leaveEnd(Request $request)
     {
-        $employee = Auth::user()->employee;
+        /** @var User $user */
+        $user = Auth::user();
+        $employee = $user->employee;
         $attendance = Attendance::where('employee_id', $employee->id)->where('date', now('Asia/Makassar')->toDateString())->first();
         if (!$attendance) {
             return back()->with('error', 'No attendance for today.');
@@ -240,16 +251,18 @@ class EmployeeController extends Controller
 
     public function requestDayOff(Request $request)
     {
-        $employee = Auth::user()->employee;
+        /** @var User $user */
+        $user = Auth::user();
+        $employee = $user->employee;
         $data = $request->validate([
             'date' => ['required', 'date'],
-            'shift' => ['required', 'in:morning,evening,night'],
+            'shift' => ['required', 'exists:shift_hours,id'],
             'reason' => ['nullable', 'string', 'max:1000'],
         ]);
         RequestAbsent::create([
             'employee_id' => $employee->id,
             'date' => $data['date'],
-            'shift' => $data['shift'],
+            'shift_hour_id' => $data['shift'],
             'reason' => $data['reason'] ?? null,
             'status' => 'pending',
         ]);
@@ -258,18 +271,20 @@ class EmployeeController extends Controller
 
     public function requestShiftChange(Request $request)
     {
-        $employee = Auth::user()->employee;
+        /** @var User $user */
+        $user = Auth::user();
+        $employee = $user->employee;
         $data = $request->validate([
             'actual_date' => ['required', 'date'],
             'request_date' => ['required', 'date'],
-            'shift' => ['required', 'in:morning,evening,night'],
+            'shift' => ['required', 'exists:shift_hours,id'],
             'reason' => ['nullable', 'string', 'max:1000'],
         ]);
         RequestShift::create([
             'employee_id' => $employee->id,
             'actual_date' => $data['actual_date'],
             'request_date' => $data['request_date'],
-            'shift' => $data['shift'],
+            'shift_hour_id' => $data['shift'],
             'reason' => $data['reason'] ?? null,
             'status' => 'pending',
         ]);
@@ -277,7 +292,9 @@ class EmployeeController extends Controller
     }
     public function shiftSchedule(Request $request)
     {
-        $employee = Auth::user()->employee;
+        /** @var User $user */
+        $user = Auth::user();
+        $employee = $user->employee;
         $data = $request->validate([
             'date' => ['required', 'date'],
             'shift_hour_id' => ['required', 'exists:shift_hours,id'],
@@ -290,5 +307,30 @@ class EmployeeController extends Controller
             'status' => $data['status'],
         ]);
         return back()->with('success', 'Shift schedule submitted.');
+    }
+
+    public function updateProfile(Request $request)
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
+        ]);
+
+        $user->update([
+            'name' => $data['name'],
+            'email' => $data['email'],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile updated successfully!',
+            'data' => [
+                'name' => $user->name,
+                'email' => $user->email,
+            ]
+        ]);
     }
 }

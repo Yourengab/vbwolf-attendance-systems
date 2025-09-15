@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="en" data-theme="light">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendar</title>
-    @vite(['resources/css/app.css','resources/js/app.js'])
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.14/dist/full.min.css" rel="stylesheet">
+@extends('layouts.main')
+
+@section('title', 'Calendar')
+@section('page-title', 'Attendance Calendar')
+
+@section('head')
     <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@6.1.10/index.global.min.js"></script>
@@ -17,7 +15,6 @@
         }
         .fc-event:hover {
             transform: scale(1.02);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         .fc-daygrid-event {
             margin: 1px 0;
@@ -30,16 +27,17 @@
             font-weight: 600;
         }
         .fc-button {
-            background-color: #3b82f6 !important;
-            border-color: #3b82f6 !important;
+            background-color: #374151 !important;
+            border-color: #374151 !important;
+            color: white !important;
         }
         .fc-button:hover {
-            background-color: #2563eb !important;
-            border-color: #2563eb !important;
+            background-color: #1f2937 !important;
+            border-color: #1f2937 !important;
         }
         .fc-button-active {
-            background-color: #1d4ed8 !important;
-            border-color: #1d4ed8 !important;
+            background-color: #111827 !important;
+            border-color: #111827 !important;
         }
         @media (max-width: 768px) {
             .fc-toolbar {
@@ -52,147 +50,168 @@
             }
         }
     </style>
-</head>
-<body class="min-h-screen bg-base-200 text-base-content">
-    <div class="flex">
-        <aside class="w-64 min-h-screen bg-base-100 border-r border-base-300 p-4 space-y-2">
-            <div class="text-sm font-semibold mb-2">Navigation</div>
-            <a href="{{ route('admin.dashboard') }}" class="btn btn-ghost justify-start">Dashboard</a>
-            <a href="{{ route('admin.branches') }}" class="btn btn-ghost justify-start">Branches</a>
-            <a href="{{ route('admin.positions') }}" class="btn btn-ghost justify-start">Positions</a>
-            <a href="{{ route('admin.employees') }}" class="btn btn-ghost justify-start">Employees</a>
-            <a href="{{ route('admin.requests') }}" class="btn btn-ghost justify-start">Requests</a>
-            <a href="{{ route('admin.reports') }}" class="btn btn-ghost justify-start">Reports</a>
-            <a href="{{ route('admin.calendar') }}" class="btn btn-ghost justify-start">Calendar</a>
-            <form method="POST" action="{{ route('logout') }}" class="pt-4 border-t border-base-300 mt-2">
-                @csrf
-                <button class="btn btn-ghost justify-start w-full">Logout</button>
-            </form>
-        </aside>
-        <main class="flex-1 p-6 space-y-4">
-            <!-- Statistics Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-                <div class="stat bg-base-100 rounded-lg shadow">
-                    <div class="stat-title">Total Employees</div>
-                    <div class="stat-value text-primary" id="total-employees">-</div>
-                </div>
-                <div class="stat bg-base-100 rounded-lg shadow">
-                    <div class="stat-title">Present Today</div>
-                    <div class="stat-value text-success" id="present-count">-</div>
-                </div>
-                <div class="stat bg-base-100 rounded-lg shadow">
-                    <div class="stat-title">Absent Today</div>
-                    <div class="stat-value text-error" id="absent-count">-</div>
-                </div>
-                <div class="stat bg-base-100 rounded-lg shadow">
-                    <div class="stat-title">Shift Changes</div>
-                    <div class="stat-value text-info" id="shift-changes">-</div>
-                </div>
-                <div class="stat bg-base-100 rounded-lg shadow">
-                    <div class="stat-title">Pending Requests</div>
-                    <div class="stat-value text-warning" id="pending-requests">-</div>
-                </div>
-                <div class="stat bg-base-100 rounded-lg shadow">
-                    <div class="stat-title">Shift Schedule</div>
-                    <div class="stat-value text-warning" id="shift-schedule">-</div>
-                </div>
-            </div>
+@endsection
 
-            <div class="bg-base-100 border border-base-300 rounded p-4">
-                <div class="flex flex-wrap items-center gap-2 mb-4">
-                    <select id="employee-filter" class="select select-bordered select-sm">
-                        <option value="">All Employees</option>
-                        @foreach($employees as $employee)
-                            <option value="{{ $employee->id }}">{{ $employee->name }}</option>
-                        @endforeach
-                    </select>
-                    <select id="branch-filter" class="select select-bordered select-sm">
-                        <option value="">All Branches</option>
-                        @foreach($branches as $branch)
-                            <option value="{{ $branch->id }}">{{ $branch->name }}</option>
-                        @endforeach
-                    </select>
-                    <select id="position-filter" class="select select-bordered select-sm">
-                        <option value="">All Positions</option>
-                        @foreach($positions as $position)
-                            <option value="{{ $position->id }}">{{ $position->name }}</option>
-                        @endforeach
-                    </select>
-                    <button id="filter-btn" class="btn btn-neutral btn-sm">Filter</button>
-                    <button id="clear-filter-btn" class="btn btn-outline btn-sm">Clear</button>
-                    <button id="refresh-btn" class="btn btn-ghost btn-sm">🔄</button>
-                </div>
-                <div class="border border-base-300 rounded h-[70vh] overflow-hidden relative">
-                    <div id="calendar" class="h-full"></div>
-                    <div id="calendar-loading" class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center hidden">
-                        <div class="loading loading-spinner loading-lg text-primary"></div>
-                    </div>
-                </div>
+@section('content')
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
+        <div class="bg-white border border-gray-200 rounded-lg p-6">
+            <div class="text-sm text-gray-500 mb-2">Total Employees</div>
+            <div class="text-3xl font-bold text-gray-900" id="total-employees">-</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-6">
+            <div class="text-sm text-gray-500 mb-2">Present Today</div>
+            <div class="text-3xl font-bold text-green-600" id="present-count">-</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-6">
+            <div class="text-sm text-gray-500 mb-2">Absent Today</div>
+            <div class="text-3xl font-bold text-red-600" id="absent-count">-</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-6">
+            <div class="text-sm text-gray-500 mb-2">Shift Changes</div>
+            <div class="text-3xl font-bold text-blue-600" id="shift-changes">-</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-6">
+            <div class="text-sm text-gray-500 mb-2">Pending Requests</div>
+            <div class="text-3xl font-bold text-yellow-600" id="pending-requests">-</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-6">
+            <div class="text-sm text-gray-500 mb-2">Shift Schedule</div>
+            <div class="text-3xl font-bold text-purple-600" id="shift-schedule">-</div>
+        </div>
+    </div>
+
+    <!-- Calendar Section -->
+    <div class="bg-white border border-gray-200 rounded-lg p-6">
+        <div class="flex flex-wrap items-center gap-4 mb-6">
+            <div>
+                <label for="employee-filter" class="block text-sm font-medium text-gray-700 mb-1">Employee</label>
+                <select id="employee-filter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400">
+                    <option value="">All Employees</option>
+                    @foreach($employees as $employee)
+                        <option value="{{ $employee->id }}">{{ $employee->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="branch-filter" class="block text-sm font-medium text-gray-700 mb-1">Branch</label>
+                <select id="branch-filter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400">
+                    <option value="">All Branches</option>
+                    @foreach($branches as $branch)
+                        <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="position-filter" class="block text-sm font-medium text-gray-700 mb-1">Position</label>
+                <select id="position-filter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400">
+                    <option value="">All Positions</option>
+                    @foreach($positions as $position)
+                        <option value="{{ $position->id }}">{{ $position->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="flex gap-2">
+                <button id="filter-btn" class="px-4 py-2 bg-gray-800 text-white font-medium rounded-md hover:bg-gray-700 transition-colors">Filter</button>
+                <button id="clear-filter-btn" class="px-4 py-2 bg-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-400 transition-colors">Clear</button>
+                <button id="refresh-btn" class="px-4 py-2 bg-gray-100 text-gray-600 font-medium rounded-md hover:bg-gray-200 transition-colors">🔄</button>
+            </div>
+        </div>
+        <div class="border border-gray-200 rounded-lg h-[70vh] overflow-hidden relative">
+            <div id="calendar" class="h-full"></div>
+            <div id="calendar-loading" class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center hidden">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+            </div>
+        </div>
                 
-                <!-- Quick Actions -->
-                <div class="mt-4 flex flex-wrap items-center justify-between">
-                    <div class="text-sm">
-                        <div class="flex flex-wrap gap-4">
-                            <span><span class="inline-block w-3 h-3 rounded bg-green-400 mr-1"></span>Present</span>
-                            <span><span class="inline-block w-3 h-3 rounded bg-blue-400 mr-1"></span>Shift Change</span>
-                            <span><span class="inline-block w-3 h-3 rounded bg-red-400 mr-1"></span>Absent</span>
-                            <span><span class="inline-block w-3 h-3 rounded bg-orange-400 mr-1"></span>Pending Requests</span>
-                        </div>
-                    </div>
-                    <div class="flex gap-2">
-                        <button id="help-btn" class="btn btn-ghost btn-sm">?</button>
-                        <button id="export-btn" class="btn btn-outline btn-sm">Export Calendar</button>
-                        <button id="print-btn" class="btn btn-outline btn-sm">Print View</button>
-                    </div>
+        <!-- Quick Actions -->
+        <div class="mt-6 flex flex-wrap items-center justify-between">
+            <div class="text-sm">
+                <div class="flex flex-wrap gap-6">
+                    <span class="flex items-center"><span class="inline-block w-3 h-3 rounded bg-green-500 mr-2"></span>Present</span>
+                    <span class="flex items-center"><span class="inline-block w-3 h-3 rounded bg-blue-500 mr-2"></span>Shift Change</span>
+                    <span class="flex items-center"><span class="inline-block w-3 h-3 rounded bg-red-500 mr-2"></span>Absent</span>
+                    <span class="flex items-center"><span class="inline-block w-3 h-3 rounded bg-yellow-500 mr-2"></span>Pending Requests</span>
+                    <span class="flex items-center"><span class="inline-block w-3 h-3 rounded bg-purple-500 mr-2"></span>Shift Schedule</span>
                 </div>
             </div>
-        </main>
+            <div class="flex gap-3">
+                <button id="help-btn" class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors">?</button>
+                <button id="export-btn" class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors">Export Calendar</button>
+                <button id="print-btn" class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors">Print View</button>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-6 flex flex-wrap items-center justify-between">
+            <div class="text-sm">
+                <div class="flex flex-wrap gap-6">
+                    <span class="flex items-center"><span class="inline-block w-3 h-3 rounded bg-green-500 mr-2"></span>Present</span>
+                    <span class="flex items-center"><span class="inline-block w-3 h-3 rounded bg-blue-500 mr-2"></span>Shift Change</span>
+                    <span class="flex items-center"><span class="inline-block w-3 h-3 rounded bg-red-500 mr-2"></span>Absent</span>
+                    <span class="flex items-center"><span class="inline-block w-3 h-3 rounded bg-yellow-500 mr-2"></span>Pending Requests</span>
+                    <span class="flex items-center"><span class="inline-block w-3 h-3 rounded bg-purple-500 mr-2"></span>Shift Schedule</span>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button id="help-btn" class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors">?</button>
+                <button id="export-btn" class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors">Export Calendar</button>
+                <button id="print-btn" class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors">Print View</button>
+            </div>
+        </div>
     </div>
 
     <!-- Event Details Modal -->
-    <div id="event-modal" class="modal">
-        <div class="modal-box">
-            <h3 class="font-bold text-lg" id="modal-title"></h3>
-            <div id="modal-content" class="py-4"></div>
-            <div class="modal-action">
-                <button class="btn" onclick="closeEventModal()">Close</button>
+    <div id="event-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-gray-600 bg-opacity-75" onclick="closeEventModal()"></div>
+        <div class="relative mx-auto my-8 max-w-md bg-white rounded-lg shadow-xl">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900" id="modal-title"></h3>
+            </div>
+            <div class="px-6 py-4" id="modal-content"></div>
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+                <button class="px-4 py-2 bg-gray-800 text-white font-medium rounded-md hover:bg-gray-700 transition-colors" onclick="closeEventModal()">Close</button>
             </div>
         </div>
     </div>
 
     <!-- Help Modal -->
-    <div id="help-modal" class="modal">
-        <div class="modal-box">
-            <h3 class="font-bold text-lg">Calendar Help & Keyboard Shortcuts</h3>
-            <div class="py-4 space-y-4">
+    <div id="help-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-gray-600 bg-opacity-75" onclick="closeHelpModal()"></div>
+        <div class="relative mx-auto my-8 max-w-lg bg-white rounded-lg shadow-xl">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Calendar Help & Keyboard Shortcuts</h3>
+            </div>
+            <div class="px-6 py-4 space-y-4">
                 <div>
-                    <h4 class="font-semibold mb-2">Navigation</h4>
-                    <div class="grid grid-cols-2 gap-2 text-sm">
-                        <div><kbd class="kbd kbd-sm">Ctrl + ←</kbd> Previous period</div>
-                        <div><kbd class="kbd kbd-sm">Ctrl + →</kbd> Next period</div>
-                        <div><kbd class="kbd kbd-sm">Ctrl + Home</kbd> Go to today</div>
+                    <h4 class="font-semibold mb-2 text-gray-900">Navigation</h4>
+                    <div class="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                        <div><kbd class="px-2 py-1 bg-gray-100 rounded text-xs">Ctrl + ←</kbd> Previous period</div>
+                        <div><kbd class="px-2 py-1 bg-gray-100 rounded text-xs">Ctrl + →</kbd> Next period</div>
+                        <div><kbd class="px-2 py-1 bg-gray-100 rounded text-xs">Ctrl + Home</kbd> Go to today</div>
                     </div>
                 </div>
                 <div>
-                    <h4 class="font-semibold mb-2">View Switching</h4>
-                    <div class="grid grid-cols-2 gap-2 text-sm">
-                        <div><kbd class="kbd kbd-sm">Ctrl + 1</kbd> Month view</div>
-                        <div><kbd class="kbd kbd-sm">Ctrl + 2</kbd> Week view</div>
-                        <div><kbd class="kbd kbd-sm">Ctrl + 3</kbd> List view</div>
+                    <h4 class="font-semibold mb-2 text-gray-900">View Switching</h4>
+                    <div class="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                        <div><kbd class="px-2 py-1 bg-gray-100 rounded text-xs">Ctrl + 1</kbd> Month view</div>
+                        <div><kbd class="px-2 py-1 bg-gray-100 rounded text-xs">Ctrl + 2</kbd> Week view</div>
+                        <div><kbd class="px-2 py-1 bg-gray-100 rounded text-xs">Ctrl + 3</kbd> List view</div>
                     </div>
                 </div>
                 <div>
-                    <h4 class="font-semibold mb-2">Legend</h4>
-                    <div class="space-y-2 text-sm">
-                        <div><span class="inline-block w-3 h-3 rounded bg-green-400 mr-2"></span>Present - Employee attended work</div>
-                        <div><span class="inline-block w-3 h-3 rounded bg-blue-400 mr-2"></span>Shift Change - Approved shift change request</div>
-                        <div><span class="inline-block w-3 h-3 rounded bg-red-400 mr-2"></span>Absent - Approved absence request</div>
-                        <div><span class="inline-block w-3 h-3 rounded bg-orange-400 mr-2"></span>Pending - Requests awaiting approval</div>
+                    <h4 class="font-semibold mb-2 text-gray-900">Legend</h4>
+                    <div class="space-y-2 text-sm text-gray-600">
+                        <div><span class="inline-block w-3 h-3 rounded bg-green-500 mr-2"></span>Present - Employee attended work</div>
+                        <div><span class="inline-block w-3 h-3 rounded bg-blue-500 mr-2"></span>Shift Change - Approved shift change request</div>
+                        <div><span class="inline-block w-3 h-3 rounded bg-red-500 mr-2"></span>Absent - Approved absence request</div>
+                        <div><span class="inline-block w-3 h-3 rounded bg-yellow-500 mr-2"></span>Pending - Requests awaiting approval</div>
+                        <div><span class="inline-block w-3 h-3 rounded bg-purple-500 mr-2"></span>Shift Schedule - Scheduled shifts</div>
                     </div>
                 </div>
             </div>
-            <div class="modal-action">
-                <button class="btn" onclick="closeHelpModal()">Close</button>
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+                <button class="px-4 py-2 bg-gray-800 text-white font-medium rounded-md hover:bg-gray-700 transition-colors" onclick="closeHelpModal()">Close</button>
             </div>
         </div>
     </div>
@@ -483,34 +502,66 @@
             function showErrorMessage(message) {
                 // Create toast notification
                 const toast = document.createElement('div');
-                toast.className = 'toast toast-top toast-end';
+                toast.className = 'fixed top-4 right-4 z-50 max-w-sm';
                 toast.innerHTML = `
-                    <div class="alert alert-error">
-                        <span>${message}</span>
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3 text-sm font-medium text-red-800">
+                            ${message}
+                        </div>
+                        <div class="ml-auto pl-3">
+                            <button onclick="this.parentElement.parentElement.parentElement.remove()" class="inline-flex rounded-md p-1.5 text-red-400 hover:bg-red-100 hover:text-red-600 focus:outline-none">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 `;
                 document.body.appendChild(toast);
-                
+
                 // Remove toast after 5 seconds
                 setTimeout(() => {
-                    toast.remove();
+                    if (toast.parentElement) {
+                        toast.remove();
+                    }
                 }, 5000);
             }
 
             function showSuccessMessage(message) {
                 // Create toast notification
                 const toast = document.createElement('div');
-                toast.className = 'toast toast-top toast-end';
+                toast.className = 'fixed top-4 right-4 z-50 max-w-sm';
                 toast.innerHTML = `
-                    <div class="alert alert-success">
-                        <span>${message}</span>
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3 text-sm font-medium text-green-800">
+                            ${message}
+                        </div>
+                        <div class="ml-auto pl-3">
+                            <button onclick="this.parentElement.parentElement.parentElement.remove()" class="inline-flex rounded-md p-1.5 text-green-400 hover:bg-green-100 hover:text-green-600 focus:outline-none">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 `;
                 document.body.appendChild(toast);
-                
+
                 // Remove toast after 5 seconds
                 setTimeout(() => {
-                    toast.remove();
+                    if (toast.parentElement) {
+                        toast.remove();
+                    }
                 }, 5000);
             }
 
@@ -587,20 +638,20 @@
                 }
                 
                 content.innerHTML = contentHtml;
-                modal.classList.add('modal-open');
+                modal.classList.remove('hidden');
             }
 
             window.closeEventModal = function() {
-                document.getElementById('event-modal').classList.remove('modal-open');
+                document.getElementById('event-modal').classList.add('hidden');
             };
 
             window.closeHelpModal = function() {
-                document.getElementById('help-modal').classList.remove('modal-open');
+                document.getElementById('help-modal').classList.add('hidden');
             };
 
             // Export and Print functionality
             document.getElementById('help-btn').addEventListener('click', function() {
-                document.getElementById('help-modal').classList.add('modal-open');
+                document.getElementById('help-modal').classList.remove('hidden');
             });
 
             document.getElementById('export-btn').addEventListener('click', function() {
@@ -666,7 +717,4 @@
             }
         });
     </script>
-</body>
-</html>
-
-
+@endsection

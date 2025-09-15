@@ -11,7 +11,7 @@ class RequestShift extends Model
         'employee_id',
         'actual_date',
         'request_date',
-        'shift',
+        'shift_hour_id',
         'reason',
         'status',
         'approved_by',

@@ -10,7 +10,7 @@ class RequestAbsent extends Model
     protected $fillable = [
         'employee_id',
         'date',
-        'shift',
+        'shift_hour_id',
         'reason',
         'status',
         'approved_by',
@@ -25,5 +25,9 @@ class RequestAbsent extends Model
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+    public function shiftHour(): BelongsTo
+    {
+        return $this->belongsTo(ShiftHour::class, 'shift_hour_id');
     }
 }

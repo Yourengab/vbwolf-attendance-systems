@@ -27,6 +27,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/employee/request-dayoff', [EmployeeController::class, 'requestDayOff'])->name('employee.request_dayoff');
     Route::post('/employee/request-shift', [EmployeeController::class, 'requestShiftChange'])->name('employee.request_shift');
     Route::post('/employee/shift-schedule', [EmployeeController::class, 'shiftSchedule'])->name('employee.shift-schedule');
+    Route::post('/employee/profile', [EmployeeController::class, 'updateProfile'])->name('employee.update_profile');
     // Admin area
     Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
@@ -57,7 +58,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/shift-hours/{shiftHour}', [AdminController::class, 'shiftHourUpdate'])->name('shift-hour.update');
         Route::delete('/shift-hours/{shiftHour}', [AdminController::class, 'shiftHourDestroy'])->name('shift-hour.destroy');
         Route::get('/shift-templates', [AdminController::class, 'shiftTemplates'])->name('shift-templates');
-        Route::post('/shift-templates', [AdminController::class, 'shiftTemplateStore'])->name('shift-template.store');
+        Route::post('/shift-templates', [AdminController::class, 'shiftTemplateStore'])->name('shift-templates.store');
         Route::post('/shift-templates/{shiftTemplate}', [AdminController::class, 'shiftTemplateUpdate'])->name('shift-templates.update');
         Route::delete('/shift-templates/{shiftTemplate}', [AdminController::class, 'shiftTemplateDestroy'])->name('shift-templates.destroy');
         

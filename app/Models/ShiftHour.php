@@ -18,4 +18,8 @@ class ShiftHour extends Model
     {
         return $this->hasMany(RequestShift::class);
     }
+    public function requestAbsents()
+    {
+        return $this->hasMany(RequestAbsent::class);
+    }
 }
