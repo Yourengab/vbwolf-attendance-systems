@@ -44,9 +44,10 @@ public function getTotalWorkHoursAttribute()
     // 1) Gross menit
     $grossMinutes = $clockIn->diffInMinutes($clockOut);
 
-    // 2) Aturan shift
+    // 2) Aturan shift - convert break_duration from decimal hours to minutes
     $st = optional($this->employee->position->shiftTemplates->first());
-    $breakMinutes = (int) ($st->break_duration ?? 0);
+    $breakHours = floatval($st->break_duration ?? 0);
+    $breakMinutes = (int) ($breakHours * 60); // Convert decimal hours to minutes
     $maxWorkMinutes = (int) ($st->max_work_hour ?? 0);
 
     // 3) Total izin
@@ -72,8 +73,8 @@ public function getTotalWorkHoursAttribute()
     $totalMinutes = max($totalMinutes, 0);
 
     // 7) Konversi ke jam & menit
-    $hours = intdiv($totalMinutes, 60);  // jam utuh
-    $minutes = $totalMinutes % 60;       // sisa menit
+    $hours = intdiv($totalMinutes, 60);
+    $minutes = $totalMinutes % 60;
 
     return "{$hours} hours {$minutes} minutes";
 }

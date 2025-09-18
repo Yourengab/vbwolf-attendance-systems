@@ -56,7 +56,7 @@
                             <button class="w-full px-4 py-2 bg-gray-800 text-white font-medium rounded-md hover:bg-gray-700 transition-colors {{ (!$clockedIn || $clockedOut || $hasLeaveAny) ? 'opacity-50 cursor-not-allowed' : '' }}" {{ (!$clockedIn || $clockedOut || $hasLeaveAny) ? 'disabled' : '' }}>Start Leave</button>
                             <div>
                                 <label for="leave_reason" class="block text-sm font-medium text-gray-700 mb-1">Reason</label>
-                                <textarea name="reason" id="leave_reason" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400" placeholder="Enter reason for leave"></textarea>
+                                <textarea name="reason" id="leave_reason" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400" placeholder="Enter reason for leave" required></textarea>
                             </div>
                         </form>
                         <form method="POST" action="{{ route('employee.leave_end') }}">
@@ -79,18 +79,6 @@
                 </ul>
                 <div class="border-t border-gray-200 pt-4">
                     <div class="flex flex-col gap-4">
-                        {{-- <form method="POST" action="{{ route('employee.overtime_start') }}" class="space-y-3">
-                            @csrf
-                            <button class="w-full px-4 py-2 bg-gray-800 text-white font-medium rounded-md hover:bg-gray-700 transition-colors {{ ($clockedOut && !$activeOvertime && $overtimes->count() == 0) ? '' : 'opacity-50 cursor-not-allowed' }}" {{ ($clockedOut && !$activeOvertime && $overtimes->count() == 0) ? '' : 'disabled' }}>Start Overtime</button>
-                            <div>
-                                <label for="overtime_reason" class="block text-sm font-medium text-gray-700 mb-1">Reason</label>
-                                <textarea name="reason" id="overtime_reason" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400" placeholder="Enter reason for overtime"></textarea>
-                            </div>
-                        </form> --}}
-                        {{-- <form method="POST" action="{{ route('employee.overtime_end') }}">
-                            @csrf
-                            <button class="w-full px-4 py-2 bg-gray-600 text-white font-medium rounded-md hover:bg-gray-500 transition-colors {{ $activeOvertime ? '' : 'opacity-50 cursor-not-allowed' }}" {{ $activeOvertime ? '' : 'disabled' }}>End Overtime</button>
-                        </form> --}}
                     </div>
                 </div>
             </div>
@@ -222,53 +210,37 @@
         </div>
 
         <div class="bg-white border border-gray-200 rounded-lg p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-semibold text-gray-900">My Profile</h2>
-                <div class="flex gap-3">
-                    <button id="editProfileBtn" onclick="toggleProfileEdit()" class="px-4 py-2 bg-gray-800 text-white font-medium rounded-md hover:bg-gray-700 transition-colors">
-                        <i data-lucide="edit-2" class="w-4 h-4 inline mr-2"></i>
-                        Edit Profile
-                    </button>
-                    <button id="saveProfileBtn" onclick="saveProfile()" class="px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 transition-colors hidden">
-                        <i data-lucide="save" class="w-4 h-4 inline mr-2"></i>
-                        Save Changes
-                    </button>
-                    <button id="cancelProfileBtn" onclick="cancelProfileEdit()" class="px-4 py-2 bg-gray-500 text-white font-medium rounded-md hover:bg-gray-600 transition-colors hidden">
-                        <i data-lucide="x" class="w-4 h-4 inline mr-2"></i>
-                        Cancel
-                    </button>
-                </div>
-            </div>
-
-            <form id="profileForm" class="space-y-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-6">My Profile</h2>
+            <form method="POST" action="{{ url('/employee/profile') }}" class="space-y-6">
+                @csrf
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                            <input type="text" id="profile_name" name="name" value="{{ auth()->user()->name ?? 'N/A' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400" readonly />
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Name <span class="text-xs text-gray-400">(editable)</span></label>
+                            <input type="text" name="name" value="{{ old('name', auth()->user()->name ?? 'N/A') }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400" required />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                            <input type="email" id="profile_email" name="email" value="{{ auth()->user()->email ?? 'N/A' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400" readonly />
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-xs text-gray-400">(editable)</span></label>
+                            <input type="email" name="email" value="{{ old('email', auth()->user()->email ?? 'N/A') }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400" required />
                         </div>
                     </div>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Employee ID</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Employee ID <span class="text-xs text-gray-400">(read-only)</span></label>
                             <input type="text" value="{{ auth()->user()->employee->nip ?? 'N/A' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50" readonly />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Branch</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Branch <span class="text-xs text-gray-400">(read-only)</span></label>
                             <input type="text" value="{{ auth()->user()->employee->branch->name ?? 'N/A' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50" readonly />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Position</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Position <span class="text-xs text-gray-400">(read-only)</span></label>
                             <input type="text" value="{{ auth()->user()->employee->position->name ?? 'N/A' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50" readonly />
                         </div>
                     </div>
                 </div>
+                <button type="submit" class="px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 transition-colors">Save Changes</button>
             </form>
-
             <div class="mt-6 pt-6 border-t border-gray-200">
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <div class="flex items-start">
@@ -350,7 +322,7 @@
         </div>
     </div>
 
-    <script>
+<script>
         (function(){
             const startBtn = document.getElementById('start_cam');
             const snapBtn = document.getElementById('take_photo');
@@ -573,131 +545,6 @@
             }
         })();
 
-        // Profile Edit functions
-        (function(){
-            let originalName = '';
-            let originalEmail = '';
-
-            window.toggleProfileEdit = function() {
-                const nameInput = document.getElementById('profile_name');
-                const emailInput = document.getElementById('profile_email');
-                const editBtn = document.getElementById('editProfileBtn');
-                const saveBtn = document.getElementById('saveProfileBtn');
-                const cancelBtn = document.getElementById('cancelProfileBtn');
-
-                // Store original values
-                originalName = nameInput.value;
-                originalEmail = emailInput.value;
-
-                // Toggle readonly state
-                nameInput.readOnly = !nameInput.readOnly;
-                emailInput.readOnly = !emailInput.readOnly;
-
-                // Toggle button visibility
-                editBtn.classList.toggle('hidden');
-                saveBtn.classList.toggle('hidden');
-                cancelBtn.classList.toggle('hidden');
-
-                // Focus on name input when editing starts
-                if (!nameInput.readOnly) {
-                    nameInput.focus();
-                }
-            }
-
-            window.saveProfile = function() {
-                const nameInput = document.getElementById('profile_name');
-                const emailInput = document.getElementById('profile_email');
-                const saveBtn = document.getElementById('saveProfileBtn');
-                const newName = nameInput.value.trim();
-                const newEmail = emailInput.value.trim();
-
-                // Basic validation
-                if (!newName) {
-                    alert('Name cannot be empty.');
-                    nameInput.focus();
-                    return;
-                }
-
-                if (!newEmail) {
-                    alert('Email cannot be empty.');
-                    emailInput.focus();
-                    return;
-                }
-
-                // Simple email validation
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(newEmail)) {
-                    alert('Please enter a valid email address.');
-                    emailInput.focus();
-                    return;
-                }
-
-                // Check if anything changed
-                if (newName === originalName && newEmail === originalEmail) {
-                    alert('No changes were made to your profile.');
-                    toggleProfileEdit(); // Exit edit mode
-                    return;
-                }
-
-                // Disable save button to prevent double submission
-                saveBtn.disabled = true;
-                saveBtn.textContent = 'Saving...';
-
-                // Prepare form data
-                const formData = new FormData();
-                formData.append('name', newName);
-                formData.append('email', newEmail);
-                formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-
-                // Send AJAX request
-                fetch('/employee/profile', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Update original values
-                        originalName = data.data.name;
-                        originalEmail = data.data.email;
-
-                        // Show success message
-                        alert('Your profile has been updated successfully!\n\nName: ' + data.data.name + '\nEmail: ' + data.data.email);
-
-                        // Exit edit mode
-                        toggleProfileEdit();
-                    } else {
-                        alert('Error updating profile. Please try again.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error updating profile. Please try again.');
-                })
-                .finally(() => {
-                    // Re-enable save button
-                    saveBtn.disabled = false;
-                    saveBtn.innerHTML = '<i data-lucide="save" class="w-4 h-4 inline mr-2"></i>Save Changes';
-                    lucide.createIcons(); // Re-create icons
-                });
-            }
-
-            window.cancelProfileEdit = function() {
-                const nameInput = document.getElementById('profile_name');
-                const emailInput = document.getElementById('profile_email');
-
-                // Restore original values
-                nameInput.value = originalName;
-                emailInput.value = originalEmail;
-
-                // Exit edit mode
-                toggleProfileEdit();
-            }
-        })();
-
         // Realtime clock
         (function(){
             const timeEl = document.getElementById('now_time');
@@ -714,4 +561,4 @@
             setInterval(tick, 1000);
         })();
     </script>
-@endsection
+@endsection 

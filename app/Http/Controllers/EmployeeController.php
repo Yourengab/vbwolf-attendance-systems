@@ -56,11 +56,27 @@ class EmployeeController extends Controller
         }
 
         $overtimeMinutes = 0;
-        foreach ($overtimes as $ot) {
-            $start = Carbon::parse($ot->start_time);
-            $end = $ot->end_time ? Carbon::parse($ot->end_time) : Carbon::now('Asia/Makassar');
-            $overtimeMinutes += max(0, $start->diffInMinutes($end));
+        $employee = $user->employee;
+        $shiftTemplate = ShiftTemplate::where('position_id', $employee->position_id)->first();
+        
+        if ($shiftTemplate) {
+            // Convert decimal hours to minutes (e.g., 8.5 hours = 510 minutes)
+            $maxWorkMinutes = (int)($shiftTemplate->max_work_hour * 60);
+            
+            if ($workMinutes > $maxWorkMinutes) {
+            $extraMinutes = $workMinutes - $maxWorkMinutes;
+
+            // Only count as overtime if extra time is more than 60 minutes
+            if ($extraMinutes >= 61) {
+                foreach ($overtimes as $overtime) {
+                    $start = Carbon::parse($overtime->start_time);
+                    $end = $overtime->end_time ? Carbon::parse($overtime->end_time) : Carbon::now('Asia/Makassar');
+                    $overtimeMinutes += max(0, $start->diffInMinutes($end));
+                }
+            }
         }
+    }
+    // dd($overtimeMinutes);
 
         $formatMinutes = function (int $minutes): string {
             $hours = intdiv($minutes, 60);
@@ -324,13 +340,12 @@ class EmployeeController extends Controller
             'email' => $data['email'],
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Profile updated successfully!',
-            'data' => [
-                'name' => $user->name,
-                'email' => $user->email,
-            ]
-        ]);
+        // Also update name in employee table
+        if ($user->employee) {
+            $user->employee->name = $data['name'];
+            $user->employee->save();
+        }
+
+        return redirect()->back()->with('success', 'Profile updated successfully!');
     }
 }
