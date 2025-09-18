@@ -1,3 +1,4 @@
+<!-- filepath: c:\laragon\www\vbwolf-attendance-system\resources\views\auth\login.blade.php -->
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
@@ -6,62 +7,62 @@
     <title>Login</title>
     @vite(['resources/css/app.css','resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-base-200">
-    <div class="min-h-screen flex items-center justify-center p-4">
-        <div class="w-full max-w-md">
-            <div class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                    <h2 class="card-title justify-center">Sign in</h2>
-                    @if ($errors->any())
-                        <div class="alert alert-error text-sm">
-                            <span>{{ $errors->first() }}</span>
-                        </div>
-                    @endif
-
-                    <form method="POST" action="{{ route('login.attempt') }}" class="space-y-4">
-                        @csrf
-                        <input type="hidden" name="type" id="login-type" value="{{ old('type', 'employee') }}" />
-                        <div class="grid grid-cols-2 gap-2">
-                            <button type="button" id="btn-employee" class="btn">Employee</button>
-                            <button type="button" id="btn-admin" class="btn">Admin</button>
-                        </div>
-                        @error('type')
-                        <div class="text-error text-sm mt-1">{{ $message }}</div>
-                        @enderror
-                        <div id="admin-fields">
-                            <div class="form-control">
-                                <label class="label"><span class="label-text">Email</span></label>
-                                <input type="email" name="email" value="{{ old('email') }}" class="input input-bordered" placeholder="you@example.com" />
-                                @error('email')
-                                <div class="text-error text-sm mt-1">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="form-control">
-                                <label class="label"><span class="label-text">Password</span></label>
-                                <input type="password" name="password" class="input input-bordered" placeholder="••••••••" />
-                            </div>
-                        </div>
-
-                        <div id="employee-fields" class="hidden">
-                            <div class="form-control">
-                                <label class="label"><span class="label-text">NIP</span></label>
-                                <input type="text" name="nip" value="{{ old('nip') }}" class="input input-bordered" placeholder="EMP-001" />
-                                @error('nip')
-                                <div class="text-error text-sm mt-1">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="form-control">
-                            <label class="label cursor-pointer justify-start gap-2">
-                                <input type="checkbox" name="remember" class="checkbox checkbox-primary" />
-                                <span class="label-text">Remember me</span>
-                            </label>
-                        </div>
-                        <div class="form-control mt-2">
-                            <button type="submit" class="btn btn-primary w-full">Login</button>
-                        </div>
-                    </form>
+<body class="min-h-screen bg-base-200 flex items-center justify-center">
+    <div class="w-full max-w-md">
+        <div class="bg-base-100 shadow-lg rounded-xl overflow-hidden">
+            <div class="px-8 py-10">
+                <div class="flex flex-col items-center mb-8">
+                    <svg class="w-12 h-12 text-primary mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c1.657 0 3-1.343 3-3S13.657 5 12 5s-3 1.343-3 3 1.343 3 3 3zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                    <h2 class="text-2xl font-bold text-gray-900">VB Wolf Attendance</h2>
                 </div>
+                @if ($errors->any())
+                    <div class="alert alert-error text-sm mb-4">
+                        <span>{{ $errors->first() }}</span>
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ route('login.attempt') }}" class="space-y-6">
+                    @csrf
+                    <input type="hidden" name="type" id="login-type" value="{{ old('type', 'employee') }}" />
+                    <div class="flex gap-2 mb-4">
+                        <button type="button" id="btn-employee" class="btn flex-1">Employee</button>
+                        <button type="button" id="btn-admin" class="btn flex-1">Admin</button>
+                    </div>
+                    @error('type')
+                    <div class="text-error text-sm mb-2">{{ $message }}</div>
+                    @enderror
+
+                    <div id="admin-fields">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-1">Email</label>
+                            <input type="email" name="email" value="{{ old('email') }}" class="input input-bordered w-full" placeholder="you@example.com" />
+                            @error('email')
+                            <div class="text-error text-sm mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-1">Password</label>
+                            <input type="password" name="password" class="input input-bordered w-full" placeholder="••••••••" />
+                        </div>
+                    </div>
+
+                    <div id="employee-fields" class="hidden">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-1">NIP</label>
+                            <input type="text" name="nip" value="{{ old('nip') }}" class="input input-bordered w-full" placeholder="EMP-001" />
+                            @error('nip')
+                            <div class="text-error text-sm mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <input type="checkbox" name="remember" class="checkbox checkbox-primary" />
+                        <span class="text-sm">Remember me</span>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-full mt-2">Login</button>
+                </form>
             </div>
         </div>
     </div>
@@ -109,7 +110,6 @@
             btnEmp.addEventListener('click', () => { inputType.value = 'employee'; render(); });
             btnAdm.addEventListener('click', () => { inputType.value = 'admin'; render(); });
             form.addEventListener('submit', () => {
-                // ensure hidden input reflects current mode before submit
                 inputType.value = inputType.value === 'admin' ? 'admin' : 'employee';
             });
             btnEmp.classList.add('btn-outline');
@@ -119,5 +119,3 @@
     </script>
 </body>
 </html>
-
-
