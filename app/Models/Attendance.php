@@ -48,7 +48,7 @@ public function getTotalWorkHoursAttribute()
     $st = optional($this->employee->position->shiftTemplates->first());
     $breakHours = floatval($st->break_duration ?? 0);
     $breakMinutes = (int) ($breakHours * 60); // Convert decimal hours to minutes
-    $maxWorkMinutes = (int) ($st->max_work_hour ?? 0);
+    $maxWorkMinutes = (float) ($st->max_work_hour * 60 ?? 0);
 
     // 3) Total izin
     $leaveMinutes = $this->permissions->sum(function ($p) {
@@ -64,14 +64,16 @@ public function getTotalWorkHoursAttribute()
 
     // 5) Hitung total menit
     $totalMinutes = $grossMinutes - $breakMinutes - $leaveMinutes;
-
-    // 6) Tambahkan lembur hanya jika melewati max work + 1 jam
-    if ($maxWorkMinutes > 0 && $grossMinutes > ($maxWorkMinutes + 60)) {
-        $totalMinutes += $overtimeMinutes;
+    
+    // cek apakah total kerja melebihin max work
+    if ($totalMinutes > $maxWorkMinutes) {
+        // Jika total kerja + 1 jam melebihi max work, tambahkan lembur
+        if ($totalMinutes > ($maxWorkMinutes + 60)) {
+            $totalMinutes += $overtimeMinutes;
+        }
     }
 
     $totalMinutes = max($totalMinutes, 0);
-
     // 7) Konversi ke jam & menit
     $hours = intdiv($totalMinutes, 60);
     $minutes = $totalMinutes % 60;

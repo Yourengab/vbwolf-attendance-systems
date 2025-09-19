@@ -169,19 +169,31 @@ class EmployeeController extends Controller
         $clockOut = Carbon::parse($attendance->clock_out . 'Asia/Makassar');
 
 
-        $durationMinutes = $clockIn->diffInMinutes($clockOut);
-        if ($durationMinutes > $maxHour->max_work_hour) {
-            $threshold = 60;
-            if ($durationMinutes > $threshold) {
-                $overtimeStart = $clockIn->copy()->addMinutes($threshold);
-                $overtimeEnd   = $clockOut;
+        // Hitung durasi kerja dikurangi leaves dan break_duration
+        $leaveMinutes = LeavePermission::where('attendance_id', $attendance->id)
+            ->get()
+            ->sum(function ($leave) {
+            $start = Carbon::parse($leave->start_time);
+            $end = $leave->end_time ? Carbon::parse($leave->end_time) : Carbon::now('Asia/Makassar');
+            return max(0, $start->diffInMinutes($end));
+            });
 
-                Overtime::create([
-                    'attendance_id' => $attendance->id,
-                    'start_time'    => $overtimeStart,
-                    'end_time'      => $overtimeEnd,
-                ]);
-            }
+        $breakDuration = $attendance->break_duration ?? 0; // pastikan kolom break_duration ada di tabel attendance
+
+        $durationMinutes = $clockIn->diffInMinutes($clockOut) - $leaveMinutes - $breakDuration;
+
+        $maxWorkMinutes = (int)($maxHour->max_work_hour * 60);
+
+        // Jika durasi kerja melebihi total_work_hour + 1 jam (60 menit), maka catat overtime
+        if ($durationMinutes > ($maxWorkMinutes + 60)) {
+            $overtimeStart = $clockIn->copy()->addMinutes($maxWorkMinutes + 60);
+            $overtimeEnd   = $clockOut;
+
+            Overtime::create([
+            'attendance_id' => $attendance->id,
+            'start_time'    => $overtimeStart,
+            'end_time'      => $overtimeEnd,
+            ]);
         }
 
 
