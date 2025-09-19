@@ -65,14 +65,6 @@ public function getTotalWorkHoursAttribute()
     // 5) Hitung total menit
     $totalMinutes = $grossMinutes - $breakMinutes - $leaveMinutes;
     
-    // cek apakah total kerja melebihin max work
-    if ($totalMinutes > $maxWorkMinutes) {
-        // Jika total kerja + 1 jam melebihi max work, tambahkan lembur
-        if ($totalMinutes > ($maxWorkMinutes + 60)) {
-            $totalMinutes += $overtimeMinutes;
-        }
-    }
-
     $totalMinutes = max($totalMinutes, 0);
     // 7) Konversi ke jam & menit
     $hours = intdiv($totalMinutes, 60);

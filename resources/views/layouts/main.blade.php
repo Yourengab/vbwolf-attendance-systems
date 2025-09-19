@@ -28,6 +28,10 @@
                         <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3"></i>
                         Dashboard
                     </a>
+                    <a href="{{ route('admin.profile.edit') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.profile.edit') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <i data-lucide="user" class="w-5 h-5 mr-3"></i>
+                        Edit Admin Profile
+                    </a>
                     <a href="{{ route('admin.branches') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.branches*') ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                         <i data-lucide="building-2" class="w-5 h-5 mr-3"></i>
                         Branches

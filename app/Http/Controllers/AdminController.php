@@ -18,6 +18,29 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
+    public function editProfile()
+    {
+        $admin = Auth::user();
+        return view('admin.profile.edit', compact('admin'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $admin = User::find(Auth::id());
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255'],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        if (!empty($data['password'])) {
+            $admin->password = bcrypt($data['password']);
+        }
+        $admin->name = $data['name'];
+        $admin->email = $data['email'];
+        $admin->save();
+        return redirect()->route('admin.profile.edit')->with('success', 'Informasi admin berhasil diupdate.');
+    }
     public function dashboard()
     {
         $today = now()->toDateString();

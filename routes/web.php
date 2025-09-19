@@ -31,6 +31,8 @@ Route::middleware('auth')->group(function () {
     // Admin area
     Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/profile/edit', [AdminController::class, 'editProfile'])->name('profile.edit');
+    Route::post('/profile/update', [AdminController::class, 'updateProfile'])->name('profile.update');
         Route::get('/branches', [AdminController::class, 'branches'])->name('branches');
         Route::post('/branches', [AdminController::class, 'branchStore'])->name('branches.store');
         Route::post('/branches/{branch}', [AdminController::class, 'branchUpdate'])->name('branches.update');
